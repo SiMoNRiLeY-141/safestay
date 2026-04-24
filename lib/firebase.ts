@@ -12,9 +12,12 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+// Initialize Firebase only on the client side to prevent build errors during static generation
+const app = typeof window !== "undefined" 
+  ? (getApps().length > 0 ? getApp() : initializeApp(firebaseConfig))
+  : (null as any);
 
-const auth = getAuth(app);
-const db = getFirestore(app);
+const auth = typeof window !== "undefined" ? getAuth(app) : (null as any);
+const db = typeof window !== "undefined" ? getFirestore(app) : (null as any);
 
 export { app, auth, db };

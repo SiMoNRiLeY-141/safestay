@@ -15,10 +15,6 @@ export default function AdminLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!auth) {
-      setError("Firebase is not configured. Please add your credentials to .env.local");
-      return;
-    }
 
     setLoading(true);
     setError(null);
@@ -92,11 +88,7 @@ export default function AdminLogin() {
           </button>
         </form>
 
-        {!auth && (
-          <div className="w-full bg-yellow-50 border border-yellow-200 p-4 rounded-lg text-sm text-yellow-800 mt-4">
-            <strong>Setup Required:</strong> Firebase is not initialized. Please configure `.env.local` to continue.
-          </div>
-        )}
+
       </div>
     </main>
   );

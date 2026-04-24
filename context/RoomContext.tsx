@@ -28,11 +28,6 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   const [isSeeding, setIsSeeding] = useState(false);
 
   useEffect(() => {
-    if (!db) {
-      console.warn("Firestore not initialized. Using initial static rooms.");
-      return;
-    }
-
     const roomsRef = collection(db, "rooms");
 
     // Listen to real-time updates
@@ -77,15 +72,11 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
       )
     );
 
-    if (db) {
-      try {
-        const roomDocRef = doc(db, "rooms", roomNumber.toString());
-        await updateDoc(roomDocRef, { guestStatus: status });
-      } catch (error) {
-        console.error("Error updating room status in Firestore:", error);
-      }
-    } else {
-      console.warn("Firestore not initialized. Update is local-only.");
+    try {
+      const roomDocRef = doc(db, "rooms", roomNumber.toString());
+      await updateDoc(roomDocRef, { guestStatus: status });
+    } catch (error) {
+      console.error("Error updating room status in Firestore:", error);
     }
   }
 

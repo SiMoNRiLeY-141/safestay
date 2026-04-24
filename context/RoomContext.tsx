@@ -7,20 +7,31 @@ import { db } from "@/lib/firebase";
 export type GuestStatus = "Unknown" | "Safe" | "Need Help";
 
 export interface Room {
-  roomNumber: number;
+  id: string;
+  name: string;
   guestStatus: GuestStatus;
+  floor?: string;
+  gridCol?: number;
+  gridRow?: number;
 }
 
 interface RoomContextValue {
   rooms: Room[];
-  updateStatus: (roomNumber: number, status: GuestStatus) => void;
+  updateStatus: (id: string, status: GuestStatus) => void;
+  addRoom: (room: Room) => Promise<void>;
+  updateRoom: (id: string, updates: Partial<Room>) => Promise<void>;
+  deleteRoom: (id: string) => Promise<void>;
+  deleteRooms: (ids: string[]) => Promise<void>;
+  resetStatuses: () => Promise<void>;
 }
 
 const RoomContext = createContext<RoomContextValue | null>(null);
 
 const initialRooms: Room[] = Array.from({ length: 30 }, (_, i) => ({
-  roomNumber: i + 1,
+  id: (i + 1).toString(),
+  name: (i + 1).toString(),
   guestStatus: "Unknown",
+  floor: "Ground Floor",
 }));
 
 export function RoomProvider({ children }: { children: React.ReactNode }) {
@@ -38,7 +49,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         try {
           const batch = writeBatch(db);
           initialRooms.forEach((room) => {
-            const roomDocRef = doc(db, "rooms", room.roomNumber.toString());
+            const roomDocRef = doc(db, "rooms", room.id);
             batch.set(roomDocRef, room);
           });
           await batch.commit();
@@ -53,8 +64,15 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
         snapshot.forEach((docSnap) => {
           fetchedRooms.push(docSnap.data() as Room);
         });
-        // Sort rooms by roomNumber
-        fetchedRooms.sort((a, b) => a.roomNumber - b.roomNumber);
+        // Sort rooms by name (numeric if possible, otherwise alphabetical)
+        fetchedRooms.sort((a, b) => {
+          const aName = a.name || "";
+          const bName = b.name || "";
+          const aNum = parseInt(aName);
+          const bNum = parseInt(bName);
+          if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+          return aName.localeCompare(bName);
+        });
         if (fetchedRooms.length > 0) {
           setRooms(fetchedRooms);
         }
@@ -64,24 +82,87 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, [isSeeding]);
 
-  async function updateStatus(roomNumber: number, status: GuestStatus) {
+  async function updateStatus(id: string, status: GuestStatus) {
     // Optimistic UI update
     setRooms((prev) =>
       prev.map((room) =>
-        room.roomNumber === roomNumber ? { ...room, guestStatus: status } : room
+        room.id === id ? { ...room, guestStatus: status } : room
       )
     );
 
     try {
-      const roomDocRef = doc(db, "rooms", roomNumber.toString());
+      const roomDocRef = doc(db, "rooms", id);
       await updateDoc(roomDocRef, { guestStatus: status });
     } catch (error) {
       console.error("Error updating room status in Firestore:", error);
     }
   }
 
+  async function addRoom(room: Room) {
+    try {
+      const roomDocRef = doc(db, "rooms", room.id);
+      await setDoc(roomDocRef, room);
+    } catch (error) {
+      console.error("Error adding room:", error);
+    }
+  }
+
+  async function updateRoom(id: string, updates: Partial<Room>) {
+    try {
+      const roomDocRef = doc(db, "rooms", id);
+      await updateDoc(roomDocRef, updates);
+    } catch (error) {
+      console.error("Error updating room:", error);
+    }
+  }
+
+  async function deleteRoom(id: string) {
+    // Optimistically update
+    setRooms((prev) => prev.filter((room) => room.id !== id));
+    try {
+      const { deleteDoc } = await import("firebase/firestore");
+      const roomDocRef = doc(db, "rooms", id);
+      await deleteDoc(roomDocRef);
+    } catch (error) {
+      console.error("Error deleting room:", error);
+    }
+  }
+
+  async function resetStatuses() {
+    // Optimistic UI update
+    setRooms((prev) => prev.map((room) => ({ ...room, guestStatus: "Unknown" })));
+    
+    try {
+      const batch = writeBatch(db);
+      rooms.forEach((room) => {
+        const roomDocRef = doc(db, "rooms", room.id);
+        batch.update(roomDocRef, { guestStatus: "Unknown" });
+      });
+      await batch.commit();
+    } catch (error) {
+      console.error("Error resetting room statuses:", error);
+    }
+  }
+
+  async function deleteRooms(ids: string[]) {
+    // Optimistically update
+    setRooms((prev) => prev.filter((room) => !ids.includes(room.id)));
+    try {
+      const { deleteDoc } = await import("firebase/firestore");
+      // Use batch or loop, loop is fine for small numbers
+      const batch = writeBatch(db);
+      ids.forEach(id => {
+        const roomDocRef = doc(db, "rooms", id);
+        batch.delete(roomDocRef);
+      });
+      await batch.commit();
+    } catch (error) {
+      console.error("Error deleting rooms:", error);
+    }
+  }
+
   return (
-    <RoomContext.Provider value={{ rooms, updateStatus }}>
+    <RoomContext.Provider value={{ rooms, updateStatus, addRoom, updateRoom, deleteRoom, deleteRooms, resetStatuses }}>
       {children}
     </RoomContext.Provider>
   );

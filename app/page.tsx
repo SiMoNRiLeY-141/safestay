@@ -5,7 +5,7 @@ import { useRooms } from "@/context/RoomContext";
 
 export default function GuestPortal() {
   const { rooms, updateStatus } = useRooms();
-  const [selectedRoom, setSelectedRoom] = useState<number>(1);
+  const [selectedRoom, setSelectedRoom] = useState<string>("1");
   const [submitted, setSubmitted] = useState<"Safe" | "Need Help" | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -26,6 +26,8 @@ export default function GuestPortal() {
     timeoutRef.current = setTimeout(() => setSubmitted(null), 3000);
   }
 
+  const selectedRoomObj = rooms.find(r => r.id === selectedRoom);
+
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-10">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center gap-6">
@@ -41,21 +43,25 @@ export default function GuestPortal() {
             htmlFor="room-select"
             className="block text-sm font-medium text-gray-700 mb-2"
           >
-            Select your room number
+            Select your room
           </label>
           <select
             id="room-select"
             value={selectedRoom}
             onChange={(e) => {
-              setSelectedRoom(Number(e.target.value));
+              setSelectedRoom(e.target.value);
               setSubmitted(null);
             }}
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {rooms.map((room) => (
-              <option key={room.roomNumber} value={room.roomNumber}>
-                Room {room.roomNumber}
-              </option>
+            {Array.from(new Set(rooms.map(r => r.floor || "Ground Floor"))).sort().map(floor => (
+              <optgroup key={floor} label={floor}>
+                {rooms.filter(r => (r.floor || "Ground Floor") === floor).map(room => (
+                  <option key={room.id} value={room.id}>
+                    Room {room.name}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>
@@ -75,15 +81,15 @@ export default function GuestPortal() {
           </button>
         </div>
 
-        {submitted && (
+        {submitted && selectedRoomObj && (
           <div
             className={`w-full text-center py-3 rounded-lg font-semibold text-white ${
               submitted === "Safe" ? "bg-green-500" : "bg-red-500"
             }`}
           >
             {submitted === "Safe"
-              ? `Room ${selectedRoom} marked as Safe ✓`
-              : `Help requested for Room ${selectedRoom} ✓`}
+              ? `Room ${selectedRoomObj.name} marked as Safe ✓`
+              : `Help requested for Room ${selectedRoomObj.name} ✓`}
           </div>
         )}
 

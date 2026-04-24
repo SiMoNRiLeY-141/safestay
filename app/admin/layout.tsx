@@ -10,8 +10,8 @@ function ProtectedAdmin({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user && pathname !== "/admin/login") {
-      router.push("/admin/login");
+    if (!loading && !user && !pathname.includes("/admin/login")) {
+      router.push("/admin/login/");
     }
   }, [user, loading, pathname, router]);
 
@@ -25,7 +25,7 @@ function ProtectedAdmin({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user && pathname !== "/admin/login") {
+  if (!user && !pathname.includes("/admin/login")) {
     return null;
   }
 

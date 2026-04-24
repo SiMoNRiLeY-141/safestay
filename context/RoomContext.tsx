@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { collection, onSnapshot, doc, setDoc, updateDoc, getDocs, writeBatch } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export type GuestStatus = "Unknown" | "Safe" | "Need Help";
 
@@ -23,49 +25,68 @@ const initialRooms: Room[] = Array.from({ length: 30 }, (_, i) => ({
 
 export function RoomProvider({ children }: { children: React.ReactNode }) {
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
 
-  // Load from localStorage on initial mount
   useEffect(() => {
-    setIsMounted(true);
-    const storedRooms = localStorage.getItem("safestay_rooms");
-    if (storedRooms) {
-      try {
-        setRooms(JSON.parse(storedRooms));
-      } catch (e) {
-        console.error("Failed to parse stored rooms", e);
-      }
+    if (!db) {
+      console.warn("Firestore not initialized. Using initial static rooms.");
+      return;
     }
-  }, []);
 
-  // Save to localStorage whenever rooms change
-  useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem("safestay_rooms", JSON.stringify(rooms));
-    }
-  }, [rooms, isMounted]);
+    const roomsRef = collection(db, "rooms");
 
-  // Listen for changes from other tabs to sync in real-time
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "safestay_rooms" && e.newValue) {
+    // Listen to real-time updates
+    const unsubscribe = onSnapshot(roomsRef, async (snapshot) => {
+      if (snapshot.empty && !isSeeding) {
+        setIsSeeding(true);
+        // Seed initial data if collection is empty
         try {
-          setRooms(JSON.parse(e.newValue));
-        } catch (e) {
-          console.error("Failed to parse stored rooms from storage event", e);
+          const batch = writeBatch(db);
+          initialRooms.forEach((room) => {
+            const roomDocRef = doc(db, "rooms", room.roomNumber.toString());
+            batch.set(roomDocRef, room);
+          });
+          await batch.commit();
+          console.log("Seeded initial rooms to Firestore.");
+        } catch (error) {
+          console.error("Failed to seed initial rooms:", error);
+        } finally {
+          setIsSeeding(false);
+        }
+      } else {
+        const fetchedRooms: Room[] = [];
+        snapshot.forEach((docSnap) => {
+          fetchedRooms.push(docSnap.data() as Room);
+        });
+        // Sort rooms by roomNumber
+        fetchedRooms.sort((a, b) => a.roomNumber - b.roomNumber);
+        if (fetchedRooms.length > 0) {
+          setRooms(fetchedRooms);
         }
       }
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+    });
 
-  function updateStatus(roomNumber: number, status: GuestStatus) {
+    return () => unsubscribe();
+  }, [isSeeding]);
+
+  async function updateStatus(roomNumber: number, status: GuestStatus) {
+    // Optimistic UI update
     setRooms((prev) =>
       prev.map((room) =>
         room.roomNumber === roomNumber ? { ...room, guestStatus: status } : room
       )
     );
+
+    if (db) {
+      try {
+        const roomDocRef = doc(db, "rooms", roomNumber.toString());
+        await updateDoc(roomDocRef, { guestStatus: status });
+      } catch (error) {
+        console.error("Error updating room status in Firestore:", error);
+      }
+    } else {
+      console.warn("Firestore not initialized. Update is local-only.");
+    }
   }
 
   return (

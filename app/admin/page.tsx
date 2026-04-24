@@ -2,6 +2,7 @@
 
 import { useRooms, GuestStatus } from "@/context/RoomContext";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 function statusColor(status: GuestStatus): string {
   switch (status) {
@@ -16,6 +17,7 @@ function statusColor(status: GuestStatus): string {
 
 export default function AdminDashboard() {
   const { rooms } = useRooms();
+  const { signOut } = useAuth();
 
   const safeCount = rooms.filter((r) => r.guestStatus === "Safe").length;
   const helpCount = rooms.filter((r) => r.guestStatus === "Need Help").length;
@@ -33,12 +35,20 @@ export default function AdminDashboard() {
               Hotel Crisis Response · Ottapalam, Kerala
             </p>
           </div>
-          <Link
-            href="/"
-            className="text-sm text-blue-600 underline hover:text-blue-800"
-          >
-            ← Guest Portal
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="text-sm text-blue-600 underline hover:text-blue-800"
+            >
+              ← Guest Portal
+            </Link>
+            <button
+              onClick={signOut}
+              className="text-sm px-3 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
 
         {/* Summary bar */}

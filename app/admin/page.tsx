@@ -291,21 +291,21 @@ export default function AdminDashboard() {
 
         {/* Edit Mode */}
         {isEditMode ? (
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <div className="cyber-panel rounded-2xl p-5 sm:p-6 mb-8 border border-cyan-500/20 shadow-[0_0_24px_rgba(0,240,255,0.08)]">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">Room Configuration</h2>
+              <h2 className="text-xl font-bold text-cyan-800 dark:text-cyan-300 font-[family-name:var(--font-orbitron)] uppercase tracking-wider">Room Configuration</h2>
               <div className="flex gap-3">
                 {selectedRooms.length > 0 && (
                   <button
                     onClick={handleDeleteSelected}
-                    className="px-4 py-2 bg-red-500 text-white text-sm font-bold rounded hover:bg-red-600 transition-colors"
+                    className="px-4 py-2 bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-700 text-sm font-bold rounded-lg hover:bg-red-200 dark:hover:bg-red-800/50 transition-all"
                   >
                     Delete Selected ({selectedRooms.length})
                   </button>
                 )}
                 <button
                   onClick={handleAddRoom}
-                  className="px-4 py-2 bg-green-500 text-white text-sm font-bold rounded hover:bg-green-600 transition-colors"
+                  className="px-4 py-2 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 text-sm font-bold rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-800/50 transition-all"
                 >
                   + Add Room
                 </button>
@@ -313,14 +313,14 @@ export default function AdminDashboard() {
             </div>
             <div className="overflow-x-auto max-h-[60vh]">
               <table className="w-full text-left border-collapse">
-                <thead className="sticky top-0 bg-white shadow-sm z-10">
-                  <tr className="border-b text-sm text-gray-500">
+                <thead className="sticky top-0 bg-white/90 dark:bg-[#050b14]/95 backdrop-blur-md shadow-sm z-10">
+                  <tr className="border-b border-cyan-200/70 dark:border-cyan-900/50 text-sm text-cyan-700 dark:text-cyan-500">
                     <th className="py-3 px-4 w-12">
                       <input 
                         type="checkbox" 
                         checked={rooms.length > 0 && selectedRooms.length === rooms.length}
                         onChange={toggleSelectAll}
-                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                        className="w-4 h-4 text-cyan-600 rounded border-cyan-300 dark:border-cyan-700 focus:ring-cyan-500"
                       />
                     </th>
                     <th className="py-3 px-4 font-semibold">Name / Number</th>
@@ -332,13 +332,13 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {rooms.map((room) => (
-                    <tr key={room.id} className="border-b hover:bg-gray-50 transition-colors">
+                    <tr key={room.id} className="border-b border-cyan-100/60 dark:border-cyan-900/30 hover:bg-cyan-50/60 dark:hover:bg-cyan-950/30 transition-colors">
                       <td className="py-3 px-4">
                         <input 
                           type="checkbox"
                           checked={selectedRooms.includes(room.id)}
                           onChange={() => toggleSelectRoom(room.id)}
-                          className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          className="w-4 h-4 text-cyan-600 rounded border-cyan-300 dark:border-cyan-700 focus:ring-cyan-500"
                         />
                       </td>
                       <td className="py-3 px-4">
@@ -346,7 +346,7 @@ export default function AdminDashboard() {
                           type="text"
                           value={room.name}
                           onChange={(e) => updateRoom(room.id, { name: e.target.value })}
-                          className="border border-gray-300 rounded-lg px-3 py-1.5 w-full max-w-[200px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          className="border border-cyan-300 dark:border-cyan-800/60 rounded-lg px-3 py-1.5 w-full max-w-[200px] bg-white/90 dark:bg-[#050b14]/80 text-cyan-900 dark:text-cyan-50 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                         />
                       </td>
                       <td className="py-3 px-4">
@@ -354,7 +354,7 @@ export default function AdminDashboard() {
                           type="text"
                           value={room.floor || ""}
                           onChange={(e) => updateRoom(room.id, { floor: e.target.value })}
-                          className="border border-gray-300 rounded-lg px-3 py-1.5 w-full max-w-[150px] focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          className="border border-cyan-300 dark:border-cyan-800/60 rounded-lg px-3 py-1.5 w-full max-w-[150px] bg-white/90 dark:bg-[#050b14]/80 text-cyan-900 dark:text-cyan-50 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                           placeholder="Ground Floor"
                         />
                       </td>
@@ -363,7 +363,7 @@ export default function AdminDashboard() {
                           type="number"
                           value={room.gridCol || ""}
                           onChange={(e) => updateRoom(room.id, { gridCol: e.target.value ? parseInt(e.target.value) : undefined })}
-                          className="border border-gray-300 rounded-lg px-3 py-1.5 w-24 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          className="border border-cyan-300 dark:border-cyan-800/60 rounded-lg px-3 py-1.5 w-24 bg-white/90 dark:bg-[#050b14]/80 text-cyan-900 dark:text-cyan-50 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                           placeholder="Auto"
                           min="1"
                         />
@@ -373,7 +373,7 @@ export default function AdminDashboard() {
                           type="number"
                           value={room.gridRow || ""}
                           onChange={(e) => updateRoom(room.id, { gridRow: e.target.value ? parseInt(e.target.value) : undefined })}
-                          className="border border-gray-300 rounded-lg px-3 py-1.5 w-24 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                          className="border border-cyan-300 dark:border-cyan-800/60 rounded-lg px-3 py-1.5 w-24 bg-white/90 dark:bg-[#050b14]/80 text-cyan-900 dark:text-cyan-50 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                           placeholder="Auto"
                           min="1"
                         />
@@ -385,7 +385,7 @@ export default function AdminDashboard() {
                               deleteRoom(room.id);
                             }
                           }}
-                          className="text-red-500 hover:text-red-700 text-sm font-semibold transition-colors px-2 py-1 rounded hover:bg-red-50"
+                          className="text-red-500 hover:text-red-400 text-sm font-semibold transition-colors px-2 py-1 rounded hover:bg-red-500/10"
                         >
                           Delete
                         </button>
@@ -395,8 +395,8 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
-            <p className="text-sm text-gray-500 mt-6 border-t pt-4">
-              <strong className="text-gray-700">Tip:</strong> Use Grid Column and Row to visually position rooms on the dashboard. 
+            <p className="text-sm text-cyan-800 dark:text-cyan-500 mt-6 border-t border-cyan-200/70 dark:border-cyan-900/50 pt-4">
+              <strong className="text-cyan-900 dark:text-cyan-300">Tip:</strong> Use Grid Column and Row to visually position rooms on the dashboard. 
               Leaving them empty ("Auto") will place rooms sequentially in any available spots.
             </p>
           </div>

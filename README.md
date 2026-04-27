@@ -200,9 +200,12 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
 ```
 
 Keep Firebase values out of source control. Use `.env.local` for local development and GitHub Secrets for deployment workflows.
+
+The Ask AI button uses the server route during local development and falls back to the browser Gemini API in the static GitHub Pages build, so `NEXT_PUBLIC_GEMINI_API_KEY` must be set for deployed AI analysis.
 
 ### Local Development
 

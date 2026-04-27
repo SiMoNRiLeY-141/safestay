@@ -119,6 +119,38 @@ export default function AdminDashboard() {
     );
   };
 
+  const analyzeWithGemini = async (prompt: string) => {
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("Ask AI is unavailable in the static deployment because NEXT_PUBLIC_GEMINI_API_KEY is missing.");
+    }
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }],
+            },
+          ],
+        }),
+      }
+    );
+
+    const data = await response.json();
+    const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!response.ok || !resultText) {
+      throw new Error(data?.error?.message || "Failed to generate AI response");
+    }
+
+    return resultText;
+  };
+
   const handleAskAI = async () => {
     setIsGenerating(true);
     setAiResponse(null);
@@ -126,15 +158,36 @@ export default function AdminDashboard() {
       const roomDataStr = rooms.map(r => `Room ${r.name} (Floor: ${r.floor || 'Ground Floor'}) - Status: ${r.guestStatus}${r.helpType ? ` - Need: ${r.helpType}` : ''}`).join('\n');
       const prompt = `You are an expert crisis management AI. Here is the current real-time status of our hotel rooms:\n${roomDataStr}\n\nPlease analyze the situation, identify any critical clusters of emergencies, and suggest a priority action plan for the responders. Keep it concise.`;
 
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-      
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setAiResponse(data.result);
+      let analysisText: string | null = null;
+
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt }),
+        });
+
+        const contentType = res.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data?.error || "Failed to generate AI response");
+          }
+          analysisText = data?.result ?? null;
+        } else if (!res.ok || res.status === 404) {
+          analysisText = await analyzeWithGemini(prompt);
+        } else {
+          throw new Error("Unexpected AI response format");
+        }
+      } catch (apiError) {
+        analysisText = await analyzeWithGemini(prompt);
+      }
+
+      if (!analysisText) {
+        throw new Error("Failed to generate AI response");
+      }
+
+      setAiResponse(analysisText);
     } catch (err: any) {
       alert(err.message || "Something went wrong.");
     } finally {

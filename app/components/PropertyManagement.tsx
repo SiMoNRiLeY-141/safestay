@@ -172,6 +172,7 @@ export function PropertyManagement() {
         </h2>
         <button
           onClick={handleCancel}
+          aria-label="Close edit form"
           className="p-2 hover:bg-red-500/20 rounded-lg transition-colors text-red-600 dark:text-red-400"
         >
           <X className="w-5 h-5" />
@@ -288,6 +289,7 @@ export function PropertyManagement() {
                     />
                     <button
                       onClick={() => handleRemoveContact(idx)}
+                      aria-label="Remove contact"
                       className="p-1 hover:bg-red-500/20 rounded transition-colors text-red-600 dark:text-red-400"
                     >
                       <Trash2 className="w-4 h-4" />

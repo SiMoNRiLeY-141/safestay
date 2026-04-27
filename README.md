@@ -18,6 +18,10 @@ SafeStay is a crisis management system designed for hotels, hospitals, and simil
 ### Key Problem Solved
 Traditional emergency response in large facilities relies on guests finding phones or staff—precious seconds lost in a crisis. SafeStay enables **immediate, one-tap emergency alerts** with location data.
 
+### Live Links
+- **Guest Portal**: [https://simonriley-141.github.io/safestay/](https://simonriley-141.github.io/safestay/)
+- **Admin Portal**: [https://simonriley-141.github.io/safestay/admin/login](https://simonriley-141.github.io/safestay/admin/login)
+
 ---
 
 ## 🎯 Features
@@ -197,6 +201,8 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
 ```
+
+Keep Firebase values out of source control. Use `.env.local` for local development and GitHub Secrets for deployment workflows.
 
 ### Local Development
 
@@ -470,6 +476,7 @@ This project is provided as-is for emergency response use. See LICENSE file for 
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/SiMoNRiLeY-141/safestay/issues)
 - **Questions**: Create a discussion on GitHub
 - **Security**: Email security concerns to [project-email]
+- **Live Site**: [Guest Portal](https://simonriley-141.github.io/safestay/) | [Admin Login](https://simonriley-141.github.io/safestay/admin/login)
 
 ---
 

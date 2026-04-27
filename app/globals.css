@@ -1,1 +1,47 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-rajdhani), ui-sans-serif, system-ui, sans-serif;
+  --font-orbitron: var(--font-orbitron), sans-serif;
+  --color-cyber-cyan: #00f0ff;
+  --color-cyber-cyan-dark: #008f99;
+  --color-cyber-magenta: #ff003c;
+  --color-cyber-dark: #050b14;
+  --color-cyber-panel: rgba(5, 15, 30, 0.7);
+}
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+  .futuristic-grid {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(0, 150, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 150, 255, 0.08) 1px, transparent 1px);
+    background-position: center center;
+  }
+  
+  .dark .futuristic-grid {
+    background-image: 
+      linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+  }
+  
+  .cyber-panel {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 248, 255, 0.95) 100%);
+    box-shadow: 0 0 15px rgba(0, 150, 255, 0.1), inset 0 0 20px rgba(0, 150, 255, 0.05);
+    border: 1px solid rgba(0, 150, 255, 0.2);
+    backdrop-filter: blur(10px);
+  }
+
+  .dark .cyber-panel {
+    background: linear-gradient(135deg, rgba(5, 20, 40, 0.8) 0%, rgba(5, 10, 20, 0.9) 100%);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 20px rgba(0, 240, 255, 0.05);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+  }
+
+  .cyber-glitch:hover {
+    animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+  }
+}

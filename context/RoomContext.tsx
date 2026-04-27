@@ -10,6 +10,8 @@ export interface Room {
   id: string;
   name: string;
   guestStatus: GuestStatus;
+  helpType?: string | null;
+  helpIntensity?: "high" | "medium" | "low" | null;
   floor?: string;
   gridCol?: number;
   gridRow?: number;
@@ -17,7 +19,7 @@ export interface Room {
 
 interface RoomContextValue {
   rooms: Room[];
-  updateStatus: (id: string, status: GuestStatus) => void;
+  updateStatus: (id: string, status: GuestStatus, helpType?: string | null, helpIntensity?: "high" | "medium" | "low" | null) => void;
   addRoom: (room: Room) => Promise<void>;
   updateRoom: (id: string, updates: Partial<Room>) => Promise<void>;
   deleteRoom: (id: string) => Promise<void>;
@@ -82,17 +84,25 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, [isSeeding]);
 
-  async function updateStatus(id: string, status: GuestStatus) {
+  async function updateStatus(id: string, status: GuestStatus, helpType: string | null = null, helpIntensity: "high" | "medium" | "low" | null = null) {
     // Optimistic UI update
     setRooms((prev) =>
       prev.map((room) =>
-        room.id === id ? { ...room, guestStatus: status } : room
+        room.id === id ? { ...room, guestStatus: status, helpType, helpIntensity } : room
       )
     );
 
     try {
       const roomDocRef = doc(db, "rooms", id);
-      await updateDoc(roomDocRef, { guestStatus: status });
+      const updates: any = { guestStatus: status };
+      if (status === "Need Help") {
+        updates.helpType = helpType;
+        updates.helpIntensity = helpIntensity;
+      } else {
+        updates.helpType = null;
+        updates.helpIntensity = null;
+      }
+      await updateDoc(roomDocRef, updates);
     } catch (error) {
       console.error("Error updating room status in Firestore:", error);
     }
@@ -130,13 +140,13 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
 
   async function resetStatuses() {
     // Optimistic UI update
-    setRooms((prev) => prev.map((room) => ({ ...room, guestStatus: "Unknown" })));
+    setRooms((prev) => prev.map((room) => ({ ...room, guestStatus: "Unknown", helpType: null, helpIntensity: null })));
     
     try {
       const batch = writeBatch(db);
       rooms.forEach((room) => {
         const roomDocRef = doc(db, "rooms", room.id);
-        batch.update(roomDocRef, { guestStatus: "Unknown" });
+        batch.update(roomDocRef, { guestStatus: "Unknown", helpType: null, helpIntensity: null });
       });
       await batch.commit();
     } catch (error) {

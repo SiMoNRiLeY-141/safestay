@@ -19,6 +19,7 @@ export interface Room {
 
 interface RoomContextValue {
   rooms: Room[];
+  firestoreError: string | null;
   updateStatus: (id: string, status: GuestStatus, helpType?: string | null, helpIntensity?: "high" | "medium" | "low" | null) => void;
   addRoom: (room: Room) => Promise<void>;
   updateRoom: (id: string, updates: Partial<Room>) => Promise<void>;
@@ -39,12 +40,14 @@ const initialRooms: Room[] = Array.from({ length: 30 }, (_, i) => ({
 export function RoomProvider({ children }: { children: React.ReactNode }) {
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [firestoreError, setFirestoreError] = useState<string | null>(null);
 
   useEffect(() => {
     const roomsRef = collection(db, "rooms");
 
     // Listen to real-time updates
     const unsubscribe = onSnapshot(roomsRef, async (snapshot) => {
+      setFirestoreError(null);
       if (snapshot.empty && !isSeeding) {
         setIsSeeding(true);
         // Seed initial data if collection is empty
@@ -79,6 +82,11 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
           setRooms(fetchedRooms);
         }
       }
+    }, (error) => {
+      console.error("Firestore room listener failed:", error);
+      setFirestoreError(
+        "Live room updates are unavailable right now. The app will keep working, but refreshes may be delayed."
+      );
     });
 
     return () => unsubscribe();
@@ -172,7 +180,7 @@ export function RoomProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <RoomContext.Provider value={{ rooms, updateStatus, addRoom, updateRoom, deleteRoom, deleteRooms, resetStatuses }}>
+    <RoomContext.Provider value={{ rooms, firestoreError, updateStatus, addRoom, updateRoom, deleteRoom, deleteRooms, resetStatuses }}>
       {children}
     </RoomContext.Provider>
   );

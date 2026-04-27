@@ -33,7 +33,7 @@ const EMERGENCY_OPTIONS: EmergencyOption[] = [
 ];
 
 export default function GuestPortal() {
-  const { rooms, updateStatus } = useRooms();
+  const { rooms, updateStatus, firestoreError } = useRooms();
   const { theme, toggleTheme } = useTheme();
   const [selectedRoom, setSelectedRoom] = useState<string>("1");
   const [submitted, setSubmitted] = useState<"Safe" | "Need Help" | null>(null);
@@ -92,6 +92,12 @@ export default function GuestPortal() {
       </button>
 
       <div className="w-full max-w-md cyber-panel border-t-2 border-t-cyan-500/50 rounded-2xl p-6 sm:p-8 flex flex-col items-center gap-6 transition-all duration-300 relative overflow-hidden">
+        {firestoreError ? (
+          <div className="w-full rounded-xl border border-amber-400/60 bg-amber-100/90 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-200">
+            {firestoreError}
+          </div>
+        ) : null}
+
         {/* Decorative cyber lines */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"></div>
         <div className="absolute -left-10 top-20 w-32 h-[1px] bg-cyan-500/30 rotate-45"></div>
@@ -206,8 +212,8 @@ export default function GuestPortal() {
       {/* Property Information Modal */}
       {showPropertyInfo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8 sm:py-10 bg-black/40 backdrop-blur-sm">
-          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="absolute -top-4 -right-4 z-10">
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-hidden rounded-2xl">
+            <div className="absolute top-2 right-2 z-10">
               <button
                 onClick={() => setShowPropertyInfo(false)}
                 className="p-2 rounded-full bg-red-500/90 hover:bg-red-600 text-white transition-all shadow-lg"
@@ -216,7 +222,9 @@ export default function GuestPortal() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <PropertyDetails />
+            <div className="max-h-[90vh] overflow-y-auto overflow-x-hidden">
+              <PropertyDetails />
+            </div>
           </div>
         </div>
       )}

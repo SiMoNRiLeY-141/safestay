@@ -27,7 +27,7 @@ export function PropertyDetails() {
   }
 
   return (
-    <div className="w-full max-w-md cyber-panel rounded-2xl p-6 border border-cyan-500/30 space-y-4">
+    <div className="w-full max-w-full cyber-panel rounded-2xl p-6 border border-cyan-500/30 space-y-4 overflow-x-hidden">
       {/* Property Header */}
       <div className="text-center border-b border-cyan-500/20 pb-4">
         <h2 className="text-2xl font-bold text-cyan-700 dark:text-cyan-400 mb-1">
@@ -45,7 +45,7 @@ export function PropertyDetails() {
         {property.address && (
           <div className="flex items-start gap-3">
             <MapPin className="w-5 h-5 text-cyan-600 dark:text-cyan-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-cyan-700 dark:text-cyan-300">{property.address}</div>
+            <div className="text-sm text-cyan-700 dark:text-cyan-300 break-words">{property.address}</div>
           </div>
         )}
 
@@ -82,7 +82,7 @@ export function PropertyDetails() {
                 </div>
                 <a
                   href={`tel:${contact.phone}`}
-                  className="text-sm font-mono text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 font-semibold"
+                  className="text-sm font-mono text-red-600 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 font-semibold break-all"
                 >
                   {contact.phone}
                 </a>

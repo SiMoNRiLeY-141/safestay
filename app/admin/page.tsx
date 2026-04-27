@@ -19,7 +19,7 @@ function statusColor(status: GuestStatus, intensity?: "high" | "medium" | "low" 
 }
 
 export default function AdminDashboard() {
-  const { rooms, addRoom, updateRoom, deleteRoom, deleteRooms, resetStatuses } = useRooms();
+  const { rooms, addRoom, updateRoom, deleteRoom, deleteRooms, resetStatuses, firestoreError } = useRooms();
   const { signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -242,6 +242,12 @@ export default function AdminDashboard() {
             </button>
           </div>
         </div>
+
+        {firestoreError ? (
+          <div className="mb-4 rounded-xl border border-amber-400/60 bg-amber-100/90 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-200">
+            {firestoreError}
+          </div>
+        ) : null}
 
         {/* Dashboard Tab */}
         {activeTab === "dashboard" && (

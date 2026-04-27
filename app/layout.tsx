@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Orbitron, Rajdhani } from "next/font/google";
 import "./globals.css";
 import { RoomProvider } from "@/context/RoomContext";
+import { PropertyProvider } from "@/context/PropertyContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -21,7 +22,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${orbitron.variable} ${rajdhani.variable} font-sans antialiased bg-[#f0f8ff] dark:bg-[#050b14] text-[#003b4d] dark:text-cyan-50 transition-colors duration-300 min-h-screen futuristic-grid`}>
         <ThemeProvider>
-          <RoomProvider>{children}</RoomProvider>
+          <PropertyProvider>
+            <RoomProvider>{children}</RoomProvider>
+          </PropertyProvider>
         </ThemeProvider>
       </body>
     </html>

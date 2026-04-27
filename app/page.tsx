@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useRooms } from "@/context/RoomContext";
 import { useTheme } from "@/context/ThemeContext";
+import { PropertyDetails } from "@/app/components/PropertyDetails";
 import { 
   Flame, CloudRainWind, ShieldAlert, HeartPulse, 
   Lock, Pill, Utensils, Waves, Zap, AlertCircle, 
-  CheckCircle, ShieldPlus
+  CheckCircle, ShieldPlus, Info, X
 } from "lucide-react";
 
 type Intensity = "high" | "medium" | "low";
@@ -37,6 +38,7 @@ export default function GuestPortal() {
   const [selectedRoom, setSelectedRoom] = useState<string>("1");
   const [submitted, setSubmitted] = useState<"Safe" | "Need Help" | null>(null);
   const [showEmergencyOptions, setShowEmergencyOptions] = useState(false);
+  const [showPropertyInfo, setShowPropertyInfo] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -71,6 +73,15 @@ export default function GuestPortal() {
 
   return (
     <main className="min-h-screen bg-transparent flex flex-col items-center justify-center px-4 py-8 sm:py-10 transition-colors duration-300 relative">
+      {/* Property Info Button */}
+      <button
+        onClick={() => setShowPropertyInfo(!showPropertyInfo)}
+        className="absolute top-4 left-4 p-2 rounded-lg cyber-panel text-cyan-700 dark:text-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-300 transition-all z-10"
+        aria-label="Toggle Property Information"
+        title="Property Information"
+      >
+        <Info className="w-6 h-6" />
+      </button>
       {/* Dark Mode Toggle */}
       <button 
         onClick={toggleTheme}
@@ -191,6 +202,24 @@ export default function GuestPortal() {
           Your status will be sent to the front desk immediately.
         </p>
       </div>
+
+      {/* Property Information Modal */}
+      {showPropertyInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8 sm:py-10 bg-black/40 backdrop-blur-sm">
+          <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="absolute -top-4 -right-4 z-10">
+              <button
+                onClick={() => setShowPropertyInfo(false)}
+                className="p-2 rounded-full bg-red-500/90 hover:bg-red-600 text-white transition-all shadow-lg"
+                aria-label="Close Property Information"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <PropertyDetails />
+          </div>
+        </div>
+      )}
     </main>
   );
 }

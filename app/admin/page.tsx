@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRooms, GuestStatus } from "@/context/RoomContext";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { PropertyManagement } from "@/app/components/PropertyManagement";
 import Link from "next/link";
 
 function statusColor(status: GuestStatus, intensity?: "high" | "medium" | "low" | null): string {
@@ -26,6 +27,7 @@ export default function AdminDashboard() {
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [notifications, setNotifications] = useState<{id: string, room: string, type: string}[]>([]);
+  const [activeTab, setActiveTab] = useState<"dashboard" | "property">("dashboard");
 
   const prevRoomsRef = useRef(rooms);
 
@@ -199,19 +201,39 @@ export default function AdminDashboard() {
               Reset Statuses
             </button>
             <button
-              onClick={() => setIsEditMode(!isEditMode)}
+              onClick={() => setActiveTab("dashboard")}
               className={`text-[10px] md:text-xs px-3 py-1.5 rounded-lg font-bold tracking-wider uppercase transition-all border shrink-0 ${
-                isEditMode ? "bg-cyan-600 text-white border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]" : "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-400 border-cyan-400 dark:border-cyan-800 hover:bg-cyan-200 dark:hover:bg-cyan-800 hover:text-cyan-900 dark:hover:text-cyan-200 hover:shadow-[0_0_15px_rgba(0,150,255,0.4)] dark:hover:shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                activeTab === "dashboard" ? "bg-cyan-600 text-white border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]" : "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-400 border-cyan-400 dark:border-cyan-800 hover:bg-cyan-200 dark:hover:bg-cyan-800 hover:text-cyan-900 dark:hover:text-cyan-200"
               }`}
             >
-              {isEditMode ? "Done Editing" : "Edit Layout"}
+              Dashboard
             </button>
-            <Link
-              href="/"
-              className="text-[10px] md:text-xs px-2 text-cyan-800 dark:text-cyan-600 hover:text-cyan-600 dark:hover:text-cyan-300 tracking-wider uppercase font-bold transition-colors shrink-0 whitespace-nowrap"
+            <button
+              onClick={() => setActiveTab("property")}
+              className={`text-[10px] md:text-xs px-3 py-1.5 rounded-lg font-bold tracking-wider uppercase transition-all border shrink-0 ${
+                activeTab === "property" ? "bg-blue-600 text-white border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.6)]" : "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-400 border-blue-400 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-800 hover:text-blue-900 dark:hover:text-blue-200"
+              }`}
             >
-              ← Guest Portal
-            </Link>
+              Property Info
+            </button>
+            {activeTab === "dashboard" && (
+              <button
+                onClick={() => setIsEditMode(!isEditMode)}
+                className={`text-[10px] md:text-xs px-3 py-1.5 rounded-lg font-bold tracking-wider uppercase transition-all border shrink-0 ${
+                  isEditMode ? "bg-cyan-600 text-white border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]" : "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-800 dark:text-cyan-400 border-cyan-400 dark:border-cyan-800 hover:bg-cyan-200 dark:hover:bg-cyan-800 hover:text-cyan-900 dark:hover:text-cyan-200 hover:shadow-[0_0_15px_rgba(0,150,255,0.4)] dark:hover:shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+                }`}
+              >
+                {isEditMode ? "Done Editing" : "Edit Layout"}
+              </button>
+            )}
+            {activeTab === "dashboard" && (
+              <Link
+                href="/"
+                className="text-[10px] md:text-xs px-2 text-cyan-800 dark:text-cyan-600 hover:text-cyan-600 dark:hover:text-cyan-300 tracking-wider uppercase font-bold transition-colors shrink-0 whitespace-nowrap"
+              >
+                ← Guest Portal
+              </Link>
+            )}
             <button
               onClick={signOut}
               className="text-[10px] md:text-xs px-3 py-1.5 bg-slate-200 dark:bg-slate-800 border border-slate-400 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white rounded-lg tracking-wider uppercase font-bold transition-all shrink-0"
@@ -221,9 +243,12 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Summary bar */}
-        {!isEditMode && (
-          <div className="grid grid-cols-3 gap-3 sm:gap-6 mb-8">
+        {/* Dashboard Tab */}
+        {activeTab === "dashboard" && (
+          <>
+            {/* Summary bar */}
+            {!isEditMode && (
+              <div className="grid grid-cols-3 gap-3 sm:gap-6 mb-8">
             <div className="cyber-panel rounded-xl p-4 sm:p-5 text-center border-t-4 border-t-cyan-500 dark:border-t-cyan-600">
               <p className="text-2xl sm:text-3xl font-bold text-cyan-700 dark:text-cyan-400 font-mono">{unknownCount}</p>
               <p className="text-xs sm:text-sm text-cyan-800 dark:text-cyan-600 font-bold uppercase tracking-widest mt-1">Unknown</p>
@@ -434,6 +459,15 @@ export default function AdminDashboard() {
               <span className="w-4 h-4 rounded-sm border border-red-500 bg-red-100 dark:bg-red-600/90 shadow-[0_0_15px_rgba(220,38,38,0.4)] dark:shadow-[0_0_15px_rgba(220,38,38,0.8)] animate-pulse" />
               Critical Emergency
             </div>
+          </div>
+        )}
+          </>
+        )}
+
+        {/* Property Info Tab */}
+        {activeTab === "property" && (
+          <div className="max-w-4xl mx-auto">
+            <PropertyManagement />
           </div>
         )}
       </div>

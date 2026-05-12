@@ -28,7 +28,7 @@ export function PropertyManagement() {
     setFormData(null);
   };
 
-  const handleChange = (field: keyof Property, value: any) => {
+  const handleChange = (field: keyof Property, value: string) => {
     if (formData) {
       setFormData({ ...formData, [field]: value });
     }
@@ -145,7 +145,10 @@ export function PropertyManagement() {
             </label>
             <div className="space-y-2 mt-2">
               {property.emergencyContacts.map((contact, idx) => (
-                <div key={idx} className="bg-red-500/10 border border-red-500/20 rounded p-3">
+                <div
+                  key={idx}
+                  className="bg-red-500/10 border border-red-500/20 rounded p-3"
+                >
                   <p className="font-semibold text-sm text-red-700 dark:text-red-300">
                     {contact.name}
                   </p>
@@ -172,6 +175,8 @@ export function PropertyManagement() {
         </h2>
         <button
           onClick={handleCancel}
+          aria-label="Cancel editing"
+          title="Cancel editing"
           className="p-2 hover:bg-red-500/20 rounded-lg transition-colors text-red-600 dark:text-red-400"
         >
           <X className="w-5 h-5" />
@@ -187,6 +192,10 @@ export function PropertyManagement() {
             </label>
             <input
               type="text"
+              id="propertyName"
+              aria-label="Property Name"
+              title="Property Name"
+              placeholder="Property Name"
               value={formData.name}
               onChange={(e) => handleChange("name", e.target.value)}
               className="w-full px-4 py-2 rounded-lg border border-cyan-300 dark:border-cyan-800/50 bg-white/80 dark:bg-[#050b14]/80 text-cyan-900 dark:text-cyan-50 focus:outline-none focus:border-cyan-500 dark:focus:border-cyan-400"
@@ -199,6 +208,9 @@ export function PropertyManagement() {
                 Type *
               </label>
               <select
+                id="propertyType"
+                aria-label="Property Type"
+                title="Property Type"
                 value={formData.type}
                 onChange={(e) =>
                   handleChange(
@@ -220,6 +232,10 @@ export function PropertyManagement() {
               </label>
               <input
                 type="tel"
+                id="propertyPhone"
+                aria-label="Property Phone"
+                title="Property Phone"
+                placeholder="Property Phone"
                 value={formData.phone}
                 onChange={(e) => handleChange("phone", e.target.value)}
                 className="w-full px-4 py-2 rounded-lg border border-cyan-300 dark:border-cyan-800/50 bg-white/80 dark:bg-[#050b14]/80 text-cyan-900 dark:text-cyan-50 focus:outline-none focus:border-cyan-500 dark:focus:border-cyan-400"
@@ -233,6 +249,10 @@ export function PropertyManagement() {
             </label>
             <input
               type="text"
+              id="propertyAddress"
+              aria-label="Property Address"
+              title="Property Address"
+              placeholder="Property Address"
               value={formData.address}
               onChange={(e) => handleChange("address", e.target.value)}
               className="w-full px-4 py-2 rounded-lg border border-cyan-300 dark:border-cyan-800/50 bg-white/80 dark:bg-[#050b14]/80 text-cyan-900 dark:text-cyan-50 focus:outline-none focus:border-cyan-500 dark:focus:border-cyan-400"
@@ -255,10 +275,15 @@ export function PropertyManagement() {
             </div>
             <div className="space-y-3">
               {formData.emergencyContacts.map((contact, idx) => (
-                <div key={idx} className="bg-red-500/10 border border-red-500/20 rounded p-3 space-y-2">
+                <div
+                  key={idx}
+                  className="bg-red-500/10 border border-red-500/20 rounded p-3 space-y-2"
+                >
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="text"
+                      aria-label="Contact Name"
+                      title="Contact Name"
                       value={contact.name}
                       onChange={(e) =>
                         handleContactChange(idx, "name", e.target.value)
@@ -268,6 +293,8 @@ export function PropertyManagement() {
                     />
                     <input
                       type="text"
+                      aria-label="Contact Role"
+                      title="Contact Role"
                       value={contact.role}
                       onChange={(e) =>
                         handleContactChange(idx, "role", e.target.value)
@@ -279,6 +306,8 @@ export function PropertyManagement() {
                   <div className="flex gap-2">
                     <input
                       type="tel"
+                      aria-label="Contact Phone"
+                      title="Contact Phone"
                       value={contact.phone}
                       onChange={(e) =>
                         handleContactChange(idx, "phone", e.target.value)
@@ -288,6 +317,8 @@ export function PropertyManagement() {
                     />
                     <button
                       onClick={() => handleRemoveContact(idx)}
+                      aria-label="Remove contact"
+                      title="Remove contact"
                       className="p-1 hover:bg-red-500/20 rounded transition-colors text-red-600 dark:text-red-400"
                     >
                       <Trash2 className="w-4 h-4" />

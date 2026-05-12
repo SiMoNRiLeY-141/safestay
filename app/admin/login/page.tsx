@@ -22,8 +22,12 @@ export default function AdminLogin() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/admin");
-    } catch (err: any) {
-      setError(err.message || "Failed to log in");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "Failed to log in");
+      } else {
+        setError("Failed to log in");
+      }
     } finally {
       setLoading(false);
     }
@@ -35,7 +39,10 @@ export default function AdminLogin() {
         <div className="text-center w-full">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-gray-800">Admin Login</h1>
-            <Link href="/" className="text-sm text-blue-600 hover:text-blue-800">
+            <Link
+              href="/"
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
               Cancel
             </Link>
           </div>
@@ -87,8 +94,6 @@ export default function AdminLogin() {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
-
-
       </div>
     </main>
   );

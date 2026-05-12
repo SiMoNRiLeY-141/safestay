@@ -32,7 +32,11 @@ function ProtectedAdmin({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <AuthProvider>
       <ProtectedAdmin>{children}</ProtectedAdmin>

@@ -15,21 +15,25 @@ const firebaseConfig = {
 // Initialize Firebase only on the client side to prevent build errors during static generation.
 // Force long polling for Firestore so browsers and networks that block streaming transports
 // still receive real-time updates reliably.
-const app = typeof window !== "undefined"
-  ? (getApps().length > 0 ? getApp() : initializeApp(firebaseConfig))
-  : (null as any);
+const app =
+  typeof window !== "undefined"
+    ? getApps().length > 0
+      ? getApp()
+      : initializeApp(firebaseConfig)
+    : (null as never);
 
-const auth = typeof window !== "undefined" ? getAuth(app) : (null as any);
-const db = typeof window !== "undefined"
-  ? (() => {
-      try {
-        return initializeFirestore(app, {
-          experimentalForceLongPolling: true,
-        });
-      } catch {
-        return getFirestore(app);
-      }
-    })()
-  : (null as any);
+const auth = typeof window !== "undefined" ? getAuth(app) : (null as never);
+const db =
+  typeof window !== "undefined"
+    ? (() => {
+        try {
+          return initializeFirestore(app, {
+            experimentalForceLongPolling: true,
+          });
+        } catch {
+          return getFirestore(app);
+        }
+      })()
+    : (null as never);
 
 export { app, auth, db };

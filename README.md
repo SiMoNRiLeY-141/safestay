@@ -16,9 +16,11 @@ SafeStay is a crisis management system designed for hotels, hospitals, and simil
 - **Multi-Tenant Architecture**: Each property has its own admin account, guest portal, and emergency data
 
 ### Key Problem Solved
+
 Traditional emergency response in large facilities relies on guests finding phones or staff—precious seconds lost in a crisis. SafeStay enables **immediate, one-tap emergency alerts** with location data.
 
 ### Live Links
+
 - **Guest Portal**: [https://simonriley-141.github.io/safestay/](https://simonriley-141.github.io/safestay/)
 - **Admin Portal**: [https://simonriley-141.github.io/safestay/admin/login](https://simonriley-141.github.io/safestay/admin/login)
 
@@ -27,6 +29,7 @@ Traditional emergency response in large facilities relies on guests finding phon
 ## 🎯 Features
 
 ### Guest Portal
+
 - ✅ Simple, intuitive interface for guests to report status
 - 🆘 Report emergencies with severity levels (Fire, Medical, Threat, etc.)
 - 📍 Automatic location identification by room number
@@ -34,6 +37,7 @@ Traditional emergency response in large facilities relies on guests finding phon
 - 🌙 Dark/Light mode toggle
 
 ### Admin Dashboard
+
 - 📊 Real-time monitoring of all guest statuses
 - 🎨 Color-coded alerts (Green: Safe, Yellow/Orange: Urgent, Red: Critical)
 - 🔔 Audio alerts for new emergencies
@@ -43,6 +47,7 @@ Traditional emergency response in large facilities relies on guests finding phon
 - 📈 Multiple floor support with grid layout
 
 ### Location Management
+
 - 🏢 Store essential property information for emergency responders
 - 📍 Address and coordinates
 - ☎️ Emergency contact numbers (police, fire, ambulance liaisons)
@@ -51,6 +56,7 @@ Traditional emergency response in large facilities relies on guests finding phon
 ---
 
 ## 🚀 Getting Started
+
 - 🏢 Store essential property information for emergency responders
 - 📍 Address and coordinates
 - ☎️ Emergency contact numbers (police, fire, ambulance liaisons)
@@ -108,15 +114,17 @@ EMERGENCY RESPONSE
 ### Step-by-Step Process
 
 #### For Guests (Emergency Alert)
+
 1. **Access Portal**: Open SafeStay guest portal on mobile device or kiosk
 2. **Select Room**: Choose your room number from the list
-3. **Report Status**: 
+3. **Report Status**:
    - Click "✓ I AM SAFE" if everything is okay
    - Click "🆘 NEED HELP" if you need assistance
 4. **Select Type** (if emergency): Choose the emergency type (Fire, Medical Emergency, Active Threat, etc.)
 5. **Instant Alert**: Admin dashboard receives alert immediately with your location and emergency type
 
 #### For Admins (Crisis Management)
+
 1. **Dashboard Access**: Log in to admin portal (`/admin/login`)
 2. **Real-time Monitoring**: See all rooms on dashboard with live color-coded status
 3. **Identify Emergencies**: Spot red/orange alerts immediately
@@ -149,14 +157,14 @@ Time: < 500ms end-to-end
 
 ### Key Components & Interactions
 
-| Component | Function | Data Source |
-|-----------|----------|-------------|
-| **Guest Portal** | Report status/emergency | User input |
-| **Room Context** | Manages all room states | Firestore "rooms" collection |
-| **Admin Dashboard** | Displays real-time status | Room Context listeners |
-| **Property Context** | Manages location info | Firestore "property" document |
-| **Firestore DB** | Single source of truth | All changes sync here |
-| **AI Analyzer** | Recommends responses | Analyzes all active emergencies |
+| Component            | Function                  | Data Source                     |
+| -------------------- | ------------------------- | ------------------------------- |
+| **Guest Portal**     | Report status/emergency   | User input                      |
+| **Room Context**     | Manages all room states   | Firestore "rooms" collection    |
+| **Admin Dashboard**  | Displays real-time status | Room Context listeners          |
+| **Property Context** | Manages location info     | Firestore "property" document   |
+| **Firestore DB**     | Single source of truth    | All changes sync here           |
+| **AI Analyzer**      | Recommends responses      | Analyzes all active emergencies |
 
 ### Real-time Synchronization
 
@@ -171,7 +179,8 @@ Time: < 500ms end-to-end
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm or yarn
 - Firebase project credentials (.env.local)
 
@@ -226,6 +235,7 @@ npm start
 ## 📱 Usage
 
 ### For Guests
+
 1. Open guest portal → `/`
 2. Select your room number
 3. Click **"I AM SAFE"** or **"NEED ASSISTANCE"**
@@ -233,6 +243,7 @@ npm start
 5. Alert sent to admin dashboard instantly
 
 ### For Administrators
+
 1. Access admin portal → `/admin/login`
 2. Log in with your credentials
 3. Monitor dashboard for real-time status updates
@@ -240,6 +251,7 @@ npm start
 5. Use **Ask AI** for situation analysis
 
 ### For Emergency Services (Future)
+
 - Separate dashboard for police, fire, ambulance
 - Location-based alert filtering
 - Quick access to property details, room information, and emergency type
@@ -290,15 +302,15 @@ SafeStay Multi-Tenant System
 
 ## 💾 Technology Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | Next.js 16, React 19, TypeScript |
-| **Styling** | Tailwind CSS 4, Lucide Icons |
-| **Backend** | Next.js API Routes |
-| **Database** | Firebase Firestore (Real-time) |
-| **Authentication** | Firebase Auth |
-| **AI** | Google Generative AI (Gemini) |
-| **Deployment** | GitHub Pages (Static Export) |
+| Layer              | Technology                       |
+| ------------------ | -------------------------------- |
+| **Frontend**       | Next.js 16, React 19, TypeScript |
+| **Styling**        | Tailwind CSS 4, Lucide Icons     |
+| **Backend**        | Next.js API Routes               |
+| **Database**       | Firebase Firestore (Real-time)   |
+| **Authentication** | Firebase Auth                    |
+| **AI**             | Google Generative AI (Gemini)    |
+| **Deployment**     | GitHub Pages (Static Export)     |
 
 ---
 
@@ -339,24 +351,29 @@ safestay/
 ## 🔑 Key Features Deep Dive
 
 ### Real-time Status Monitoring
+
 - WebSocket-powered live updates via Firestore listeners
 - Color-coded severity levels with custom styling
 - Audio notifications for emergency alerts
 - Optimistic UI updates for instant feedback
 
 ### Emergency Type Classification
+
 - **High Priority (Red)**: Fire, Gas Leak, Active Threat
 - **Medium Priority (Orange)**: Medical Emergency, Trapped
 - **Low Priority (Yellow)**: Water Damage, Electrical Issues
 
 ### AI-Powered Analysis
+
 - Analyzes current emergency status across all rooms
 - Identifies emergency clusters
 - Provides response recommendations to admin staff
 - Powered by Google Generative AI (Gemini)
 
 ### Property Management
+
 Admins can maintain essential information:
+
 - Property name, type, address
 - Emergency contact numbers
 - Latitude/longitude for mapping (future)
@@ -366,6 +383,7 @@ Admins can maintain essential information:
 ## 📊 Data Model
 
 ### Room Document
+
 ```json
 {
   "id": "1",
@@ -380,6 +398,7 @@ Admins can maintain essential information:
 ```
 
 ### Property Document
+
 ```json
 {
   "id": "default",
@@ -403,13 +422,14 @@ Admins can maintain essential information:
 
 ## 🧑‍💻 Development Team
 
-| Name | Role | Expertise |
-|------|------|-----------|
-| **Adhil Jahan** | Lead Developer & Project Manager | Full-Stack Development, Crisis Systems Design |
-| **Namiya Abdul Assiz** | UI/UX Designer & Contributor | Design Systems, User Experience, Feature Ideas |
-| **Sneha** | Product Designer & Contributor | Ideas & Innovation, UI/UX Planning, Feature Strategy |
+| Name                   | Role                             | Expertise                                            |
+| ---------------------- | -------------------------------- | ---------------------------------------------------- |
+| **Adhil Jahan**        | Lead Developer & Project Manager | Full-Stack Development, Crisis Systems Design        |
+| **Namiya Abdul Assiz** | UI/UX Designer & Contributor     | Design Systems, User Experience, Feature Ideas       |
+| **Sneha**              | Product Designer & Contributor   | Ideas & Innovation, UI/UX Planning, Feature Strategy |
 
 ### Contact & Contributions
+
 - **GitHub**: [SiMoNRiLeY-141/safestay](https://github.com/SiMoNRiLeY-141/safestay)
 - **Issues & Feedback**: GitHub Issues
 - **Contributions**: Welcome! Please read CONTRIBUTING.md
@@ -419,6 +439,7 @@ Admins can maintain essential information:
 ## 🗺️ Roadmap
 
 ### v1.0 (Current) ✅
+
 - [x] Guest portal with emergency alerts
 - [x] Admin dashboard with real-time monitoring
 - [x] Property information management
@@ -426,6 +447,7 @@ Admins can maintain essential information:
 - [x] Dark/Light mode support
 
 ### v2.0 (Planned) 🔮
+
 - [ ] Multi-tenant architecture (separate URLs per property)
 - [ ] Emergency services dashboard
 - [ ] Location-based alert routing
@@ -434,6 +456,7 @@ Admins can maintain essential information:
 - [ ] SMS/Push notifications
 
 ### v3.0 (Future) 🚀
+
 - [ ] Integration with real 911 systems
 - [ ] Blockchain audit trail for incident records
 - [ ] Machine learning for incident pattern detection
@@ -445,12 +468,14 @@ Admins can maintain essential information:
 ## ⚙️ Configuration
 
 ### Firebase Setup
+
 1. Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
 2. Enable Firestore Database
 3. Enable Firebase Authentication
 4. Add your credentials to `.env.local`
 
 ### Firestore Security Rules
+
 ```javascript
 rules_version = '2';
 service cloud.firestore {
@@ -491,4 +516,4 @@ Built with ❤️ for emergency responders and safety advocates everywhere.
 
 ---
 
-*Last Updated: April 2026*
+_Last Updated: April 2026_

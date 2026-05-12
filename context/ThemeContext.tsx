@@ -17,9 +17,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check local storage or system preference on mount
     const savedTheme = localStorage.getItem("theme") as Theme | null;
-    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
     if (savedTheme) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(savedTheme);
       if (savedTheme === "dark") {
         document.documentElement.classList.add("dark");
@@ -34,13 +37,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme((prev) => {
       const newTheme = prev === "light" ? "dark" : "light";
       localStorage.setItem("theme", newTheme);
-      
+
       if (newTheme === "dark") {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
       }
-      
+
       return newTheme;
     });
   };

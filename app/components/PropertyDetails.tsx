@@ -45,7 +45,9 @@ export function PropertyDetails() {
         {property.address && (
           <div className="flex items-start gap-3">
             <MapPin className="w-5 h-5 text-cyan-600 dark:text-cyan-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-cyan-700 dark:text-cyan-300 break-words">{property.address}</div>
+            <div className="text-sm text-cyan-700 dark:text-cyan-300 break-words">
+              {property.address}
+            </div>
           </div>
         )}
 
@@ -73,7 +75,10 @@ export function PropertyDetails() {
           </div>
           <div className="space-y-2">
             {property.emergencyContacts.map((contact, index) => (
-              <div key={index} className="bg-red-500/10 border border-red-500/20 rounded p-3">
+              <div
+                key={index}
+                className="bg-red-500/10 border border-red-500/20 rounded p-3"
+              >
                 <div className="font-semibold text-sm text-red-700 dark:text-red-300">
                   {contact.name}
                 </div>

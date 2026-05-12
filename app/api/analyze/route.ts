@@ -11,7 +11,10 @@ export async function POST(request: Request) {
 
     if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json(
-        { error: "Google AI Studio API key not configured. Add GEMINI_API_KEY to your .env.local file." },
+        {
+          error:
+            "Google AI Studio API key not configured. Add GEMINI_API_KEY to your .env.local file.",
+        },
         { status: 500 }
       );
     }
@@ -25,6 +28,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ result: response.text });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Failed to generate AI response" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to generate AI response" },
+      { status: 500 }
+    );
   }
 }

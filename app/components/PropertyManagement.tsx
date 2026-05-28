@@ -30,7 +30,17 @@ export function PropertyManagement() {
 
   const handleChange = (field: keyof Property, value: string) => {
     if (formData) {
-      setFormData({ ...formData, [field]: value });
+      const updated = { ...formData };
+      if (field === "name") {
+        updated.name = value;
+      } else if (field === "type") {
+        updated.type = value as "hotel" | "hospital" | "other";
+      } else if (field === "address") {
+        updated.address = value;
+      } else if (field === "phone") {
+        updated.phone = value;
+      }
+      setFormData(updated);
     }
   };
 
@@ -39,10 +49,14 @@ export function PropertyManagement() {
     field: "name" | "phone" | "role",
     value: string
   ) => {
-    if (field !== "name" && field !== "phone" && field !== "role") return;
     if (formData) {
-      const newContacts = [...formData.emergencyContacts];
-      newContacts[index] = { ...newContacts[index], [field]: value };
+      const newContacts = formData.emergencyContacts.map((c, i) => {
+        if (i !== index) return c;
+        if (field === "name") return { ...c, name: value };
+        if (field === "phone") return { ...c, phone: value };
+        if (field === "role") return { ...c, role: value };
+        return c;
+      });
       setFormData({ ...formData, emergencyContacts: newContacts });
     }
   };

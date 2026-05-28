@@ -603,29 +603,23 @@ export default function AdminDashboard() {
                         {floor}
                       </h2>
                       <div className="cyber-panel p-5 sm:p-8 rounded-2xl transition-colors">
-                        <style dangerouslySetInnerHTML={{
-                          __html: `
-                            .grid-floor-${floor.replace(/\s+/g, '-').toLowerCase()} {
-                              grid-template-columns: repeat(${floorMaxCol}, minmax(60px, 1fr));
-                            }
-                            ${floorRooms.map(r => `
-                              .room-pos-${r.id} {
-                                grid-column: ${r.gridCol ? r.gridCol : 'auto'};
-                                grid-row: ${r.gridRow ? r.gridRow : 'auto'};
-                              }
-                            `).join('')}
-                          `
-                        }} />
                         <div
-                          className={`grid gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide grid-floor-${floor.replace(/\s+/g, '-').toLowerCase()}`}
+                          style={{
+                            gridTemplateColumns: `repeat(${floorMaxCol}, minmax(60px, 1fr))`,
+                          }}
+                          className="grid gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide"
                         >
                           {floorRooms.map((room) => (
                             <div
                               key={room.id}
+                              style={{
+                                gridColumn: room.gridCol ? room.gridCol : "auto",
+                                gridRow: room.gridRow ? room.gridRow : "auto",
+                              }}
                               className={`rounded-xl flex flex-col items-center justify-center p-4 transition-all duration-300 hover:scale-110 cursor-default border-2 backdrop-blur-md ${statusColor(
                                 room.guestStatus,
                                 room.helpIntensity
-                              )} room-pos-${room.id}`}
+                              )}`}
                             >
                               <span className="text-xl font-black truncate w-full text-center font-mono tracking-widest">
                                 {room.name}

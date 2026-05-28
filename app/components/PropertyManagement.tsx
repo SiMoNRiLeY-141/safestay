@@ -34,7 +34,12 @@ export function PropertyManagement() {
     }
   };
 
-  const handleContactChange = (index: number, field: string, value: string) => {
+  const handleContactChange = (
+    index: number,
+    field: "name" | "phone" | "role",
+    value: string
+  ) => {
+    if (field !== "name" && field !== "phone" && field !== "role") return;
     if (formData) {
       const newContacts = [...formData.emergencyContacts];
       newContacts[index] = { ...newContacts[index], [field]: value };

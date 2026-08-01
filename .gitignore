@@ -18,6 +18,10 @@
 # misc
 .DS_Store
 *.pem
+# Downloaded Firebase Admin service-account keys
+*-firebase-adminsdk-*.json
+firebase-service-account*.json
+service-account*.json
 
 # debug
 npm-debug.log*
@@ -25,9 +29,9 @@ firebase-debug.log
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env*.local
-.env
+# Local environment files. The template is intentionally tracked.
+.env*
+!.env.example
 
 # vercel
 .vercel
@@ -35,4 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.env*

@@ -201,21 +201,15 @@ cp .env.example .env.local
 
 ### Environment Variables
 
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
-GEMINI_API_KEY=your_server_only_gemini_api_key
-FIREBASE_SERVICE_ACCOUNT_JSON=your_single_line_service_account_json
-```
+Copy `.env.example` to `.env.local` and fill in values locally. Never commit, paste into issues, or share `.env.local`, a service-account JSON/key file, terminal output, or screenshots that show credential values.
 
-Keep Firebase values and service-account credentials out of source control. Use `.env.local` locally and configure them as Vercel environment variables.
+| Variables                       | Visibility       | Handling                                                                                                                                                    |
+| ------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_FIREBASE_*`        | Browser-readable | Firebase web configuration identifiers, not private credentials. Restrict the API key in Google Cloud to SafeStay's authorized APIs and origins.            |
+| `GEMINI_API_KEY`                | Server-only      | Store only in `.env.local` and Vercel server environments; never add a `NEXT_PUBLIC_` prefix. Restrict and rotate it in Google AI Studio/Google Cloud.      |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Server-only      | Store only in `.env.local` and Vercel server environments. Rotate/revoke service-account keys in Google Cloud; never download the JSON into the repository. |
 
-The Ask AI button is available only through the protected Vercel server route. Gemini credentials are never sent to the browser.
+The tracked `.env.example` contains placeholders only. `.env*` files and common Firebase service-account downloads are ignored by Git. The Ask AI button is available only through the protected Vercel server route, and Gemini credentials are never sent to the browser.
 
 ### Local Development
 
@@ -489,13 +483,14 @@ service cloud.firestore {
 ### Secure deployment and operations
 
 1. Import the repository into Vercel. Vercel detects Next.js automatically; leave the root directory as the repository root and use the tracked `vercel.json`.
-2. In **Project Settings → Environment Variables**, add every name in `.env.example` to Production, Preview, and Development as appropriate. Keep `GEMINI_API_KEY` and `FIREBASE_SERVICE_ACCOUNT_JSON` server-only; never rename them with a `NEXT_PUBLIC_` prefix.
+2. In **Project Settings → Environment Variables**, add values from `.env.example` to Production, Preview, and Development as appropriate. `NEXT_PUBLIC_FIREBASE_*` values are browser-readable; keep `GEMINI_API_KEY` and `FIREBASE_SERVICE_ACCOUNT_JSON` server-only and never rename them with a `NEXT_PUBLIC_` prefix. Do not manually configure or share `VERCEL_OIDC_TOKEN`; Vercel provisions its short-lived token automatically when needed.
 3. Add the Vercel production and preview domains to Firebase Authentication’s Authorized Domains list before testing sign-in.
 4. For local parity, run `npx vercel link` once, then `npx vercel env pull .env.local --environment=development`.
 5. Use Vercel’s Git integration: pushes to non-production branches create previews and `main` deploys production. Do not recreate the retired GitHub Pages workflow.
 6. Create an email/password Firebase user for the initial administrator, then run `npm run bootstrap:admin -- admin@example.com` with `FIREBASE_SERVICE_ACCOUNT_JSON` available.
 7. Deploy `firestore.rules` with `npx firebase-tools deploy --only firestore:rules` after reviewing it for your property’s needs.
 8. An administrator starts a stay for an occupied room, presents the generated QR code, and ends the stay at checkout. The QR link is the only guest status-reporting entry point.
+9. Rotate exposed keys instead of trying to hide them: create replacement Firebase Admin and Gemini credentials, update Vercel and `.env.local`, confirm the application works, then revoke the retired credentials. GitHub Actions scans every push and pull request for accidental secret commits.
 
 ---
 

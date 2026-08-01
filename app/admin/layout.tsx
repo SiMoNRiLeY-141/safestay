@@ -1,19 +1,19 @@
 "use client";
 
-import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 function ProtectedAdmin({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user && !pathname.includes("/admin/login")) {
+    if (!loading && (!user || !isAdmin) && !pathname.includes("/admin/login")) {
       router.push("/admin/login/");
     }
-  }, [user, loading, pathname, router]);
+  }, [user, isAdmin, loading, pathname, router]);
 
   if (loading) {
     return (
@@ -25,7 +25,7 @@ function ProtectedAdmin({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user && !pathname.includes("/admin/login")) {
+  if ((!user || !isAdmin) && !pathname.includes("/admin/login")) {
     return null;
   }
 
@@ -38,8 +38,6 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      <ProtectedAdmin>{children}</ProtectedAdmin>
-    </AuthProvider>
+    <ProtectedAdmin>{children}</ProtectedAdmin>
   );
 }

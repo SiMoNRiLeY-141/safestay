@@ -21,8 +21,8 @@ Traditional emergency response in large facilities relies on guests finding phon
 
 ### Live Links
 
-- **Guest Portal**: [https://simonriley-141.github.io/safestay/](https://simonriley-141.github.io/safestay/)
-- **Admin Portal**: [https://simonriley-141.github.io/safestay/admin/login](https://simonriley-141.github.io/safestay/admin/login)
+- **Guest Portal**: issued per-stay through a room QR link
+- **Admin Portal**: `/admin/login`
 
 ---
 
@@ -209,12 +209,13 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=your_server_only_gemini_api_key
+FIREBASE_SERVICE_ACCOUNT_JSON=your_single_line_service_account_json
 ```
 
-Keep Firebase values out of source control. Use `.env.local` for local development and GitHub Secrets for deployment workflows.
+Keep Firebase values and service-account credentials out of source control. Use `.env.local` locally and configure them as Vercel environment variables.
 
-The Ask AI button uses the server route during local development and falls back to the browser Gemini API in the static GitHub Pages build, so `NEXT_PUBLIC_GEMINI_API_KEY` must be set for deployed AI analysis.
+The Ask AI button is available only through the protected Vercel server route. Gemini credentials are never sent to the browser.
 
 ### Local Development
 
@@ -310,7 +311,7 @@ SafeStay Multi-Tenant System
 | **Database**       | Firebase Firestore (Real-time)   |
 | **Authentication** | Firebase Auth                    |
 | **AI**             | Google Generative AI (Gemini)    |
-| **Deployment**     | GitHub Pages (Static Export)     |
+| **Deployment**     | Vercel (Next.js server runtime)  |
 
 ---
 
@@ -480,16 +481,21 @@ Admins can maintain essential information:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /rooms/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    match /property/{document=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
+    // Deploy the reviewed rules from firestore.rules instead of copying rules here.
   }
 }
 ```
+
+### Secure deployment and operations
+
+1. Import the repository into Vercel. Vercel detects Next.js automatically; leave the root directory as the repository root and use the tracked `vercel.json`.
+2. In **Project Settings → Environment Variables**, add every name in `.env.example` to Production, Preview, and Development as appropriate. Keep `GEMINI_API_KEY` and `FIREBASE_SERVICE_ACCOUNT_JSON` server-only; never rename them with a `NEXT_PUBLIC_` prefix.
+3. Add the Vercel production and preview domains to Firebase Authentication’s Authorized Domains list before testing sign-in.
+4. For local parity, run `npx vercel link` once, then `npx vercel env pull .env.local --environment=development`.
+5. Use Vercel’s Git integration: pushes to non-production branches create previews and `main` deploys production. Do not recreate the retired GitHub Pages workflow.
+6. Create an email/password Firebase user for the initial administrator, then run `npm run bootstrap:admin -- admin@example.com` with `FIREBASE_SERVICE_ACCOUNT_JSON` available.
+7. Deploy `firestore.rules` with `npx firebase-tools deploy --only firestore:rules` after reviewing it for your property’s needs.
+8. An administrator starts a stay for an occupied room, presents the generated QR code, and ends the stay at checkout. The QR link is the only guest status-reporting entry point.
 
 ---
 
@@ -504,7 +510,7 @@ This project is provided as-is for emergency response use. See LICENSE file for 
 - **Issues**: Report bugs on [GitHub Issues](https://github.com/SiMoNRiLeY-141/safestay/issues)
 - **Questions**: Create a discussion on GitHub
 - **Security**: Email security concerns to [project-email]
-- **Live Site**: [Guest Portal](https://simonriley-141.github.io/safestay/) | [Admin Login](https://simonriley-141.github.io/safestay/admin/login)
+- **Deployment**: configure the Vercel project URL after the first successful deployment.
 
 ---
 

@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { PropertyManagement } from "@/app/components/PropertyManagement";
 import Link from "next/link";
+import Image from "next/image";
+import { auth } from "@/lib/firebase";
 
 function statusColor(
   status: GuestStatus,
@@ -44,9 +46,15 @@ export default function AdminDashboard() {
   const [notifications, setNotifications] = useState<
     { id: string; room: string; type: string }[]
   >([]);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "property">(
+  const [activeTab, setActiveTab] = useState<"dashboard" | "property" | "stays">(
     "dashboard"
   );
+  type ActiveStay = { id: string; roomId: string; active: true; createdAt: string | null; expiresAt: string | null };
+  type IssuedStay = { id: string; url: string; qrDataUrl: string; room: string; expiresAt: string };
+  const [stays, setStays] = useState<ActiveStay[]>([]);
+  const [staysLoading, setStaysLoading] = useState(false);
+  const [staysError, setStaysError] = useState<string | null>(null);
+  const [stay, setStay] = useState<IssuedStay | null>(null);
 
   const prevRoomsRef = useRef(rooms);
 
@@ -113,6 +121,27 @@ export default function AdminDashboard() {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
+  const authorizationHeaders = async () => {
+    const idToken = await auth.currentUser?.getIdToken();
+    if (!idToken) throw new Error("Your session has expired. Sign in again.");
+    return { Authorization: `Bearer ${idToken}` };
+  };
+
+  const loadStays = async () => {
+    setStaysLoading(true);
+    setStaysError(null);
+    try {
+      const response = await fetch("/api/admin/stays", { headers: await authorizationHeaders() });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to load active stays");
+      setStays(data.stays);
+    } catch (error) {
+      setStaysError(error instanceof Error ? error.message : "Unable to load active stays");
+    } finally {
+      setStaysLoading(false);
+    }
+  };
+
   const floors = Array.from(
     new Set(rooms.map((r) => r.floor || "Ground Floor"))
   ).sort();
@@ -164,40 +193,6 @@ export default function AdminDashboard() {
     );
   };
 
-  const analyzeWithGemini = async (prompt: string) => {
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-
-    if (!apiKey) {
-      throw new Error(
-        "Ask AI is unavailable in the static deployment because NEXT_PUBLIC_GEMINI_API_KEY is missing."
-      );
-    }
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }],
-            },
-          ],
-        }),
-      }
-    );
-
-    const data = await response.json();
-    const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!response.ok || !resultText) {
-      throw new Error(data?.error?.message || "Failed to generate AI response");
-    }
-
-    return resultText;
-  };
-
   const handleAskAI = async () => {
     setIsGenerating(true);
     setAiResponse(null);
@@ -213,9 +208,10 @@ export default function AdminDashboard() {
       let analysisText: string | null = null;
 
       try {
+        const idToken = await auth.currentUser?.getIdToken();
         const res = await fetch("/api/analyze", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
           body: JSON.stringify({ prompt }),
         });
 
@@ -226,14 +222,10 @@ export default function AdminDashboard() {
             throw new Error(data?.error || "Failed to generate AI response");
           }
           analysisText = data?.result ?? null;
-        } else if (!res.ok || res.status === 404) {
-          analysisText = await analyzeWithGemini(prompt);
         } else {
           throw new Error("Unexpected AI response format");
         }
-      } catch {
-        analysisText = await analyzeWithGemini(prompt);
-      }
+      } catch { throw new Error("AI analysis is unavailable right now."); }
 
       if (!analysisText) {
         throw new Error("Failed to generate AI response");
@@ -250,6 +242,13 @@ export default function AdminDashboard() {
       setIsGenerating(false);
     }
   };
+  const startStay = async (roomId: string, room: string) => {
+    const response = await fetch("/api/admin/stays", { method: "POST", headers: { "Content-Type": "application/json", ...(await authorizationHeaders()) }, body: JSON.stringify({ roomId }) });
+    const data = await response.json(); if (!response.ok) throw new Error(data.error || "Unable to start stay"); setStay({ ...data, room }); await loadStays();
+  };
+  const endStay = async (id: string) => { const response = await fetch(`/api/admin/stays/${id}`, { method: "DELETE", headers: await authorizationHeaders() }); if (!response.ok) throw new Error("Unable to end stay"); if (stay?.id === id) setStay(null); await loadStays(); };
+  const copyStayLink = async () => { if (!stay) return; await navigator.clipboard.writeText(stay.url); };
+  const printStay = () => { if (!stay) return; const popup = window.open("", "_blank", "width=600,height=800"); if (!popup) return; popup.opener = null; const room = stay.room.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[char] || char); popup.document.write(`<title>SafeStay QR - ${room}</title><main><h1>SafeStay</h1><h2>Room ${room}</h2><img src="${stay.qrDataUrl}" alt="QR code for room ${room}"/><p>Scan this QR code to report your safety status or request help.</p><p>Valid until ${new Date(stay.expiresAt).toLocaleString()}.</p></main><style>body{font-family:Arial;text-align:center;padding:2rem}img{width:280px;height:280px}p{font-size:16px}</style>`); popup.document.close(); popup.focus(); popup.print(); };
 
   return (
     <main className="min-h-screen bg-transparent p-4 sm:p-6 transition-colors duration-300">
@@ -336,6 +335,16 @@ export default function AdminDashboard() {
               }`}
             >
               Property Info
+            </button>
+            <button
+              onClick={() => { setActiveTab("stays"); void loadStays(); }}
+              className={`text-[10px] md:text-xs px-3 py-1.5 rounded-lg font-bold tracking-wider uppercase transition-all border shrink-0 ${
+                activeTab === "stays"
+                  ? "bg-emerald-600 text-white border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.6)]"
+                  : "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 border-emerald-400 dark:border-emerald-800 hover:bg-emerald-200 dark:hover:bg-emerald-800"
+              }`}
+            >
+              Guest QR / Stays
             </button>
             {activeTab === "dashboard" && (
               <button
@@ -556,8 +565,8 @@ export default function AdminDashboard() {
                               min="1"
                             />
                           </td>
-                          <td className="py-3 px-4">
-                            <button
+                           <td className="py-3 px-4">
+                              <button
                               onClick={() => {
                                 if (
                                   confirm(
@@ -671,6 +680,18 @@ export default function AdminDashboard() {
             <PropertyManagement />
           </div>
         )}
+        {activeTab === "stays" && (
+          <section className="max-w-5xl mx-auto cyber-panel rounded-2xl p-5 sm:p-6 border border-emerald-500/30">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <div><h2 className="text-xl font-bold text-emerald-700 dark:text-emerald-300">Guest QR / Stays</h2><p className="text-sm text-cyan-800 dark:text-cyan-400 mt-1">Issue a unique room QR at check-in. Reissuing immediately revokes the previous link.</p></div>
+              <button onClick={() => void loadStays()} disabled={staysLoading} className="px-3 py-2 rounded-lg border border-emerald-400 text-sm font-bold text-emerald-700 dark:text-emerald-300 disabled:opacity-50">{staysLoading ? "Loading…" : "Refresh"}</button>
+            </div>
+            {staysError && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{staysError}</p>}
+            <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead><tr className="border-b border-emerald-300 text-xs uppercase tracking-wider text-emerald-700 dark:text-emerald-400"><th className="p-3">Room</th><th className="p-3">Status</th><th className="p-3">Issued</th><th className="p-3">Expires</th><th className="p-3">Action</th></tr></thead><tbody>{rooms.map((room) => { const activeStay = stays.find((item) => item.roomId === room.id); return <tr key={room.id} className="border-b border-emerald-100 dark:border-emerald-900/40"><td className="p-3 font-semibold">{room.name}</td><td className="p-3">{activeStay ? <span className="rounded-full bg-emerald-100 px-2 py-1 text-xs font-bold text-emerald-800">Active</span> : <span className="text-slate-500">Inactive</span>}</td><td className="p-3 text-sm">{activeStay?.createdAt ? new Date(activeStay.createdAt).toLocaleString() : "—"}</td><td className="p-3 text-sm">{activeStay?.expiresAt ? new Date(activeStay.expiresAt).toLocaleString() : "—"}</td><td className="p-3 flex flex-wrap gap-2">{activeStay ? <><button onClick={() => startStay(room.id, room.name).catch((error) => setStaysError(error.message))} className="text-sm font-bold text-cyan-700 hover:text-cyan-500">Reissue QR</button><button onClick={() => endStay(activeStay.id).catch((error) => setStaysError(error.message))} className="text-sm font-bold text-red-600 hover:text-red-500">End Stay</button></> : <button onClick={() => startStay(room.id, room.name).catch((error) => setStaysError(error.message))} className="text-sm font-bold text-emerald-700 hover:text-emerald-500">Start Stay</button>}</td></tr>; })}</tbody></table></div>
+            {!staysLoading && rooms.length === 0 && <p className="py-8 text-center text-slate-500">No rooms are configured yet.</p>}
+          </section>
+        )}
+        {stay && <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="stay-qr-title"><div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-950 p-6 shadow-2xl"><div className="flex items-start justify-between gap-3"><div><h2 id="stay-qr-title" className="text-xl font-bold text-emerald-700 dark:text-emerald-300">Guest QR ready</h2><p className="text-sm">Room {stay.room} · expires {new Date(stay.expiresAt).toLocaleString()}</p></div><button onClick={() => setStay(null)} aria-label="Close QR dialog" className="text-xl">×</button></div><Image src={stay.qrDataUrl} alt={`QR code for room ${stay.room}`} width={320} height={320} unoptimized className="mx-auto my-5 bg-white p-2" /><p className="text-sm text-slate-600 dark:text-slate-300">Give this QR only to the guest in this room. Reissuing or ending the stay invalidates it.</p><div className="mt-5 flex flex-wrap gap-3"><button onClick={() => void copyStayLink()} className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-bold text-white">Copy Link</button><button onClick={printStay} className="rounded-lg border border-emerald-500 px-4 py-2 text-sm font-bold text-emerald-700 dark:text-emerald-300">Print QR</button><button onClick={() => endStay(stay.id).catch((error) => setStaysError(error.message))} className="rounded-lg border border-red-500 px-4 py-2 text-sm font-bold text-red-600">End Stay</button></div></div></div>}
       </div>
     </main>
   );

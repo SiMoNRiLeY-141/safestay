@@ -1,0 +1,29 @@
+// Prototype Firestore rules for SafeStay Standard/Native Firestore.
+// Data model: rooms contain operational room status; property/main contains public
+// contact information; admins/{uid} establishes an administrator role; guestSessions
+// are server-managed opaque-token records and are never available to browsers.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function validRoom(data) {
+      return data.keys().hasOnly(['id', 'name', 'guestStatus', 'helpType', 'helpIntensity', 'floor', 'gridCol', 'gridRow', 'updatedAt']) &&
+        data.keys().hasAll(['id', 'name', 'guestStatus']) &&
+        data.id is string && data.id.size() > 0 && data.id.size() <= 80 &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 80 &&
+        data.guestStatus in ['Unknown', 'Safe', 'Need Help'] &&
+        (!('helpType' in data) || data.helpType == null || (data.helpType is string && data.helpType.size() <= 80)) &&
+        (!('helpIntensity' in data) || data.helpIntensity == null || data.helpIntensity in ['high', 'medium', 'low']) &&
+        (!('floor' in data) || (data.floor is string && data.floor.size() <= 80)) &&
+        (!('gridCol' in data) || (data.gridCol is int && data.gridCol > 0 && data.gridCol <= 100)) &&
+        (!('gridRow' in data) || (data.gridRow is int && data.gridRow > 0 && data.gridRow <= 100));
+    }
+    match /rooms/{roomId} { allow read: if isAdmin(); allow create, update: if isAdmin() && validRoom(request.resource.data); allow delete: if isAdmin(); }
+    match /property/main { allow read: if true; allow create, update: if isAdmin(); allow delete: if false; }
+    match /admins/{userId} { allow get: if signedIn() && request.auth.uid == userId; allow list, create, update, delete: if false; }
+    match /guestSessions/{sessionId} { allow read, write: if false; }
+  }
+}

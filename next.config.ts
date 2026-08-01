@@ -1,16 +1,7 @@
 import type { NextConfig } from "next";
 
-const isProduction = process.env.NODE_ENV === "production";
-const basePath = isProduction ? "/safestay" : "";
-
 const nextConfig: NextConfig = {
-  output: "export",
-  trailingSlash: true,
-  basePath,
-  assetPrefix: basePath,
-  images: {
-    unoptimized: true,
-  },
+  // Vercel hosts route handlers; do not statically export this application.
 };
 
 export default nextConfig;

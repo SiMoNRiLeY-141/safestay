@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+.next
+out
+coverage
+firebase-debug.log
+*.tsbuildinfo
